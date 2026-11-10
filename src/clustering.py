@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from numbers import Integral, Real
 from typing import Any
 
 import numpy as np
@@ -87,18 +88,60 @@ def _validate_cluster_labels(labels: np.ndarray, expected_length: int) -> np.nda
     labels_array = np.asarray(labels)
     if labels_array.ndim != 1 or len(labels_array) != expected_length:
         raise ValueError("labels must contain exactly one value per user")
-    try:
-        numeric_labels = labels_array.astype(float)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("labels must contain finite integers") from exc
-    if not np.isfinite(numeric_labels).all():
+
+    # Validate each supported numeric representation without first converting
+    # integer values to float.  That conversion loses precision above 2**53
+    # and can make an out-of-range object value wrap when cast to int64.
+    if labels_array.dtype.kind in "iu":
+        for value in labels_array:
+            _validate_integer_label(value)
+    elif labels_array.dtype.kind == "f":
+        for value in labels_array:
+            _validate_float_label(value)
+    elif labels_array.dtype.kind == "O":
+        for value in labels_array:
+            if isinstance(value, (bool, np.bool_)):
+                raise ValueError("labels must contain finite integers")
+            if isinstance(value, Integral):
+                _validate_integer_label(value)
+            elif isinstance(value, Real):
+                _validate_float_label(value)
+            else:
+                raise ValueError("labels must contain finite integers")
+    else:
         raise ValueError("labels must contain finite integers")
-    if not np.equal(numeric_labels, np.floor(numeric_labels)).all():
-        raise ValueError("labels must contain integers")
+
+    # Keep the original array and dtype so accepted integer labels are never
+    # silently rewritten by validation.
+    return labels_array
+
+
+def _validate_integer_label(value: object) -> None:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral):
+        raise ValueError("labels must contain finite integers")
+    integer_value = int(value)
     int_info = np.iinfo(np.int64)
-    if (numeric_labels < int_info.min).any() or (numeric_labels > int_info.max).any():
+    if integer_value < int_info.min or integer_value > int_info.max:
         raise ValueError("labels must contain integers within the supported range")
-    return numeric_labels.astype(np.int64)
+
+
+def _validate_float_label(value: object) -> None:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+        raise ValueError("labels must contain finite integers")
+    if not bool(np.isfinite(value)):
+        raise ValueError("labels must contain finite integers")
+    if not bool(value == np.floor(value)):
+        raise ValueError("labels must contain integers")
+
+    # int(value) is exact after the integral check.  Checking the Python int,
+    # rather than a float representation of the bounds, also handles the
+    # rounded float form of np.iinfo(np.int64).max correctly.
+    integer_value = int(value)
+    int_info = np.iinfo(np.int64)
+    if integer_value < int_info.min or integer_value > int_info.max:
+        raise ValueError("labels must contain integers within the supported range")
+    if value != integer_value:
+        raise ValueError("labels must contain safely representable integers")
 
 
 def summarize_clusters(users: pd.DataFrame, labels: np.ndarray) -> pd.DataFrame:

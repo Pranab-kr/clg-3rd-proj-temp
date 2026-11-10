@@ -59,3 +59,29 @@ def test_cluster_summary_accepts_integral_float_labels():
     summary = summarize_clusters(users, np.array([0.0, 1.0, 1.0]))
 
     assert summary["count"].sum() == len(users)
+
+
+def test_cluster_summary_preserves_large_exact_integer_labels():
+    users = generate_users(seed=42, n_users=3)
+    large_label = np.int64(9_007_199_254_740_993)
+
+    integer_summary = summarize_clusters(
+        users, np.array([large_label, 1, 1], dtype=np.int64)
+    )
+    object_summary = summarize_clusters(
+        users, np.array([int(large_label), 1, 1], dtype=object)
+    )
+
+    assert integer_summary["cluster_id"].tolist() == [1, int(large_label)]
+    assert object_summary["cluster_id"].tolist() == [1, int(large_label)]
+
+
+def test_cluster_summary_rejects_integer_labels_outside_int64_range():
+    users = generate_users(seed=42, n_users=3)
+
+    with pytest.raises(ValueError, match="supported range"):
+        summarize_clusters(users, np.array([2**63, 1, 1], dtype=object))
+    with pytest.raises(ValueError, match="supported range"):
+        summarize_clusters(users, np.array([np.uint64(2**64 - 1), 1, 1]))
+    with pytest.raises(ValueError, match="supported range"):
+        summarize_clusters(users, np.array([float(2**63), 1.0, 1.0]))
