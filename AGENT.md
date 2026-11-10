@@ -59,7 +59,11 @@ Use `python -m pytest path/to/test_file.py -v` for a single test file and `pytho
 
 ## Current implementation phase
 
-Phase 1 is the project skeleton and configuration task. It creates the initial `README.md`, `requirements.txt`, `src/__init__.py`, `src/config.py`, `scripts/`, `tests/`, and the focused configuration test. The configuration contract is:
+Phase 2 is complete. The repository now has a reproducible synthetic dataset generator and validation layer in `src/data_generation.py` and `src/data_validation.py`, plus the CLI entry point `scripts/generate_data.py`. The default snapshot contains 120 products, 80 users, and 1,200 interactions. New-item products are deliberately excluded from generated historical interactions, and new-user profiles are explicitly marked.
+
+The next phase is feature preparation and clustering. Before changing implementation, run the full suite with `.venv/Scripts/python.exe -m pytest -q`, then follow the plan's test-first sequence for `src/features.py` and `src/clustering.py`. Generate local data with `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` when needed; CSV outputs are ignored by Git.
+
+Phase 1 established the configuration contract:
 
 - `RANDOM_SEED` is an integer, initially `42`.
 - `TOP_K` is `5`.
@@ -67,7 +71,13 @@ Phase 1 is the project skeleton and configuration task. It creates the initial `
 - Data and results paths are project-relative.
 - The environment and commands are documented without requiring external services.
 
-Follow the test-first sequence in the implementation plan: write the failing configuration test, run it to establish the expected failure, implement the smallest configuration and documentation needed, run the focused test and import check, then record the checkpoint in `PROJECT_PROGRESS.md`.
+Phase 2 contract:
+
+- Products, users, and interactions have explicit required schemas.
+- Validation reports missing columns and invalid ranges without hiding independently invalid values.
+- Same seed and parameters produce equivalent tables.
+- At least one new item has zero historical interactions, and at least one user is marked as new.
+- The CLI works when invoked as `python scripts/generate_data.py --seed 42` from the repository root.
 
 ## Important constraints
 

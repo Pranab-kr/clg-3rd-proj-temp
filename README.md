@@ -16,6 +16,9 @@ Use Python 3.11 or newer in a local Windows environment:
 python -m venv .venv
 source .venv/Scripts/activate
 python -m pip install -r requirements.txt
+
+# Or invoke the project environment directly from Git Bash
+.venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
 The project uses a fixed random seed (`42`) and a default recommendation size of five items. Data and experiment outputs are kept under the project-relative `data/` and `results/` paths when those phases are implemented.
@@ -32,9 +35,11 @@ python -m pytest tests/test_config.py::test_configuration_defines_reproducible_p
 # Full test suite
 python -m pytest -q
 
+# Generate the Phase 2 synthetic CSV snapshot
+.venv/Scripts/python.exe scripts/generate_data.py --seed 42
+
 # Planned commands after the corresponding phases exist
-python scripts/generate_data.py --seed 42
-python scripts/run_experiments.py --seed 42
+.venv/Scripts/python.exe scripts/run_experiments.py --seed 42
 streamlit run app.py
 ```
 

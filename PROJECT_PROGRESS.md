@@ -4,8 +4,8 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-10
-**Current phase:** Phase 1 — project skeleton and configuration complete
-**Implementation status:** Phase 1 complete; Phase 2 not started
+**Current phase:** Phase 2 — synthetic data generation and validation complete
+**Implementation status:** Phase 2 complete; Phase 3 not started
 
 ## Read this first
 
@@ -46,8 +46,9 @@ The application is not an Amazon clone and must not claim to use Amazon's privat
 - Created `AGENT.md` and `CLAUDE.md`; `CLAUDE.md` refers future agents to `@AGENT.md`.
 - Completed Phase 1: created `README.md`, `requirements.txt`, `src/__init__.py`, `src/config.py`, `scripts/`, and `tests/` layout.
 - Added `tests/test_config.py` and verified the configuration contract.
-- Installed `pytest` in the active Python environment because it was not previously available; the full dependency manifest has not been installed yet.
-- No dataset, model, app, report file, or PPT file has been created yet.
+- Created a project-local `.venv` and installed the full dependency manifest there; the earlier system-level pytest installation remains outside the repository but is not used for project verification.
+- Completed Phase 2: created `src/data_generation.py`, `src/data_validation.py`, `scripts/generate_data.py`, Phase 2 tests, and generated the local synthetic CSV snapshot under `data/`.
+- No recommender model, app, report file, or PPT file has been created yet.
 
 ## Approval gate
 
