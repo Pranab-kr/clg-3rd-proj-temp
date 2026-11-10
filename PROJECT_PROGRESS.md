@@ -4,8 +4,48 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-10
-**Current phase:** Phase 3 — feature preparation and user clustering complete
-**Implementation status:** Phase 3 complete; Phase 4 recommender work is next
+**Current phase:** Phase 4 — baseline and cold-start-aware recommenders complete
+**Implementation status:** Phase 4 complete; Phase 5 classification comparison is next
+
+## Phase 4 checkpoint
+
+**Date:** 2026-11-10
+
+**Files created:** `src/recommenders.py`, `src/explanations.py`, `tests/test_recommenders.py`, and `tests/test_explanations.py`.
+
+**Recommendation contract:** The baseline ranks every catalog product using normalized interaction activity, rating, and review-count signals with deterministic score/product-ID tie-breaking; it does not fabricate history for zero-interaction items. The proposed recommender reuses the fitted encoder from `src/features.py`, combines cosine content similarity, category match, budget/price fit, value, rating, warranty, and discount signals, and applies a bounded exposure component only to suitable new items with zero observed interactions. Both paths support missing optional review metadata, top-K values larger than the catalog, and clear validation for invalid category, budget, empty catalog, and exposure weight inputs. New-user recommendations use the preference row without requiring interaction history.
+
+**Explanation contract:** Recommendation reasons are generated from actual product metadata and score contributions. New-item text explicitly says that no interaction history is assumed; explanations do not claim unsupported purchases or reviews.
+
+**Commands run:**
+
+- `.venv/Scripts/python.exe -m pytest -q` before Phase 4 — **23 passed**.
+- `.venv/Scripts/python.exe -m pytest tests/test_recommenders.py tests/test_explanations.py -q` — **10 passed**.
+- `.venv/Scripts/python.exe -m pytest -q` after Phase 4 — **33 passed**.
+- Synthetic integration check using `generate_dataset(seed=42, n_products=120, n_users=80, n_interactions=1200)` and `recommend_for_user("u0001", ...)` — baseline and proposed top-5 tables returned successfully; proposed output included reasons and new-item candidates.
+- `git diff --check` — clean.
+
+**Deferred work:** Classification comparison, recommendation evaluation/experiment outputs, Streamlit UI, and report/PPT artifacts remain for later phases. No optional neural baseline was added.
+
+## Phase 3 checkpoint
+
+**Date:** 2026-11-10
+
+**Files created:** `src/features.py`, `src/clustering.py`, `tests/test_features.py`, and `tests/test_clustering.py`.
+
+**Feature contract:** Product features use stable categorical columns `category` and `key_specifications`, plus numeric columns `price`, `discount`, `rating`, `warranty_years`, `value_score`, `brand_age_years`, `product_age_years`, and `review_count`. Categorical values use one-hot encoding with unknown-category handling and deterministic token sorting; numeric values use `StandardScaler`. Missing optional metadata receives documented finite defaults, while malformed non-missing numeric values are rejected. `build_user_profile` maps a preference-only new user into the fitted product feature space and validates numeric budget bounds.
+
+**Clustering contract:** User clusters use preferred category/features and standardized budget bounds with deterministic `KMeans(random_state=seed, n_init=10)`. Cluster counts are validated to be at least 2, no greater than the user-row count, and no greater than the number of distinct encoded feature rows. Summaries validate finite integral labels before conversion and include `cluster_id`, `count`, average budget bounds, dominant category, and common features.
+
+**Commands run:**
+
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest tests/test_features.py tests/test_clustering.py -v` — **15 passed**.
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest -q` — **23 passed**.
+- `git diff --check` — clean.
+
+**Review fixes:** Strict malformed numeric metadata handling, deterministic feature-token canonicalization, exact cluster-label validation (including large integer and int64-boundary cases), duplicate-feature-row cluster-count validation, redundant profile assignment removal, and synchronized `AGENT.md` Phase 3/Phase 4 handoff were completed and verified.
+
+**Deferred work:** Integrating the reusable feature encoder into the baseline and proposed recommenders, plus later evaluation/UI work, remains for subsequent phases.
 
 ## Phase 3 checkpoint
 

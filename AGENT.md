@@ -59,9 +59,17 @@ Use `python -m pytest path/to/test_file.py -v` for a single test file and `pytho
 
 ## Current implementation phase
 
-Phase 3 is complete. The repository has a reproducible synthetic dataset generator and validation layer in `src/data_generation.py` and `src/data_validation.py`, plus stable product/user feature preparation and deterministic K-Means clustering in `src/features.py` and `src/clustering.py`. The default snapshot contains 120 products, 80 users, and 1,200 interactions. New-item products are deliberately excluded from generated historical interactions, and new-user profiles are explicitly marked.
+Phase 4 is complete. The repository has a reproducible synthetic dataset generator and validation layer in `src/data_generation.py` and `src/data_validation.py`, stable product/user feature preparation and deterministic K-Means clustering in `src/features.py` and `src/clustering.py`, plus baseline and explainable cold-start-aware recommenders in `src/recommenders.py` and `src/explanations.py`. The default snapshot contains 120 products, 80 users, and 1,200 interactions. New-item products are deliberately excluded from generated historical interactions, and new-user profiles are explicitly marked.
 
-The next phase is the baseline and cold-start-aware recommender. Before changing implementation, run the full suite with `.venv/Scripts/python.exe -m pytest -q`, reuse the fitted encoder from `src/features.py`, and follow the plan's test-first sequence for `src/recommenders.py` and `src/explanations.py`. Generate local data with `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` when needed; CSV outputs are ignored by Git.
+The next phase is the classification comparison. Before changing implementation, run the full suite with `.venv/Scripts/python.exe -m pytest -q`, preserve the recommender interfaces and synthetic-data constraints, and follow the plan's test-first sequence for `src/classification.py`. Generate local data with `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` when needed; CSV outputs are ignored by Git.
+
+Phase 4 recommender contract:
+
+- The baseline ranks all products with normalized interaction activity, rating, and review-count signals without fabricating history.
+- The proposed method reuses `src/features.py`, combines content similarity with category, budget, value, quality, warranty, and discount signals, and applies a bounded exposure adjustment only to suitable zero-history new items.
+- Both methods return product identity, score, rank, and human-readable reason columns; new-user preference dictionaries work without interaction rows.
+- Invalid category/budget, empty catalog, malformed numeric metadata, and invalid exposure weights produce clear errors or documented safe fallbacks.
+- Phase 4 verification: 33 tests passed; see `PROJECT_PROGRESS.md` for exact commands and integration checks.
 
 Phase 1 established the configuration contract:
 
