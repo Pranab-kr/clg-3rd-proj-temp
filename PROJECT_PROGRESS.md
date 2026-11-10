@@ -19,10 +19,11 @@
 
 **Commands run:**
 
-- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest tests/test_features.py tests/test_clustering.py -v` — **7 passed**.
-- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest -q` — **15 passed**.
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest tests/test_features.py tests/test_clustering.py -v` — **15 passed**.
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest -q` — **23 passed**.
+- `git diff --check` — clean.
 
-**Review fixes:** Strict malformed numeric metadata handling, deterministic feature-token canonicalization, cluster label validation, duplicate-feature-row cluster-count validation, redundant profile assignment removal, and synchronized `AGENT.md` Phase 3/Phase 4 handoff were completed in the follow-up commit.
+**Review fixes:** Strict malformed numeric metadata handling, deterministic feature-token canonicalization, exact cluster-label validation (including large integer and int64-boundary cases), duplicate-feature-row cluster-count validation, redundant profile assignment removal, and synchronized `AGENT.md` Phase 3/Phase 4 handoff were completed and verified.
 
 **Deferred work:** Integrating the reusable feature encoder into the baseline and cold-start recommenders, plus later evaluation/UI work, remains for subsequent phases.
 
