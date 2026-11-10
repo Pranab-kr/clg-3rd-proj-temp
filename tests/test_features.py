@@ -58,3 +58,51 @@ def test_missing_optional_product_metadata_uses_finite_defaults():
 
     assert matrix.shape[0] == len(products)
     assert np.isfinite(matrix).all()
+
+
+def test_mixed_malformed_numeric_metadata_is_rejected():
+    products = generate_products(seed=42, n_products=6)
+    products["price"] = products["price"].astype(object)
+    products.loc[0, "price"] = "not-a-price"
+
+    with pytest.raises(ValueError, match="price"):
+        build_product_matrix(products)
+
+
+def test_feature_token_order_is_canonical_for_user_profiles():
+    products = generate_products(seed=42, n_products=6)
+    _, encoder = build_product_matrix(products)
+
+    ordered = build_user_profile(
+        {
+            "preferred_category": "Television",
+            "budget_min": 400,
+            "budget_max": 900,
+            "preferred_features": "4K|HDR",
+        },
+        encoder,
+    )
+    unordered = build_user_profile(
+        {
+            "preferred_category": "Television",
+            "budget_min": 400,
+            "budget_max": 900,
+            "preferred_features": ["HDR", "4K"],
+        },
+        encoder,
+    )
+
+    np.testing.assert_array_equal(ordered, unordered)
+
+
+def test_product_feature_token_order_is_canonical():
+    products = generate_products(seed=42, n_products=6)
+    products["key_specifications"] = products["key_specifications"].astype(object)
+    products.loc[0, "key_specifications"] = ["HDR", "4K"]
+    equivalent = products.copy()
+    equivalent.loc[0, "key_specifications"] = "4K|HDR"
+
+    first_matrix, _ = build_product_matrix(products)
+    second_matrix, _ = build_product_matrix(equivalent)
+
+    np.testing.assert_array_equal(first_matrix, second_matrix)

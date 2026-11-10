@@ -59,9 +59,9 @@ Use `python -m pytest path/to/test_file.py -v` for a single test file and `pytho
 
 ## Current implementation phase
 
-Phase 2 is complete. The repository now has a reproducible synthetic dataset generator and validation layer in `src/data_generation.py` and `src/data_validation.py`, plus the CLI entry point `scripts/generate_data.py`. The default snapshot contains 120 products, 80 users, and 1,200 interactions. New-item products are deliberately excluded from generated historical interactions, and new-user profiles are explicitly marked.
+Phase 3 is complete. The repository has a reproducible synthetic dataset generator and validation layer in `src/data_generation.py` and `src/data_validation.py`, plus stable product/user feature preparation and deterministic K-Means clustering in `src/features.py` and `src/clustering.py`. The default snapshot contains 120 products, 80 users, and 1,200 interactions. New-item products are deliberately excluded from generated historical interactions, and new-user profiles are explicitly marked.
 
-The next phase is feature preparation and clustering. Before changing implementation, run the full suite with `.venv/Scripts/python.exe -m pytest -q`, then follow the plan's test-first sequence for `src/features.py` and `src/clustering.py`. Generate local data with `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` when needed; CSV outputs are ignored by Git.
+The next phase is the baseline and cold-start-aware recommender. Before changing implementation, run the full suite with `.venv/Scripts/python.exe -m pytest -q`, reuse the fitted encoder from `src/features.py`, and follow the plan's test-first sequence for `src/recommenders.py` and `src/explanations.py`. Generate local data with `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` when needed; CSV outputs are ignored by Git.
 
 Phase 1 established the configuration contract:
 

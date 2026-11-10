@@ -54,19 +54,26 @@ def _as_feature_frame(products: pd.DataFrame) -> pd.DataFrame:
         if column not in products:
             frame[column] = _DEFAULT_NUMERIC_VALUES[column]
             continue
-        values = pd.to_numeric(products[column], errors="coerce")
-        if values.isna().all() and column not in {"review_count"}:
-            raise ValueError(f"{column} must contain numeric values")
+        raw_values = products[column]
+        values = pd.to_numeric(raw_values, errors="coerce")
+        malformed = raw_values.notna() & values.isna()
+        non_finite = values.notna() & ~np.isfinite(values)
+        if malformed.any() or non_finite.any():
+            raise ValueError(f"{column} must contain numeric finite values or missing values")
         frame[column] = values.fillna(_DEFAULT_NUMERIC_VALUES[column])
 
     return frame[list(CATEGORICAL_FEATURES) + list(NUMERIC_FEATURES)]
 
 
 def _normalise_feature_value(value: Any) -> str:
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return "Unknown"
     if isinstance(value, (list, tuple, set)):
-        return "|".join(str(item) for item in value)
-    text = str(value).strip()
-    return text or "Unknown"
+        tokens = [str(item).strip() for item in value]
+    else:
+        tokens = [token.strip() for token in str(value).split("|")]
+    tokens = sorted({token for token in tokens if token})
+    return "|".join(tokens) or "Unknown"
 
 
 def build_product_matrix(products: pd.DataFrame) -> tuple[np.ndarray, object]:
@@ -128,7 +135,6 @@ def build_user_profile(user_preferences: dict, feature_encoder: object) -> np.nd
     profile = {
         "category": category,
         "key_specifications": preferred_features,
-        "price": (budget_min + budget_max) / 2,
         **defaults,
     }
     profile["price"] = (budget_min + budget_max) / 2

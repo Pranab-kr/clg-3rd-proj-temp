@@ -13,16 +13,28 @@
 
 **Files created:** `src/features.py`, `src/clustering.py`, `tests/test_features.py`, and `tests/test_clustering.py`.
 
-**Feature contract:** Product features use stable categorical columns `category` and `key_specifications`, plus numeric columns `price`, `discount`, `rating`, `warranty_years`, `value_score`, `brand_age_years`, `product_age_years`, and `review_count`. Categorical values use one-hot encoding with unknown-category handling; numeric values use `StandardScaler`. Missing optional metadata receives documented finite defaults. `build_user_profile` maps a preference-only new user into the fitted product feature space and validates numeric budget bounds.
+**Feature contract:** Product features use stable categorical columns `category` and `key_specifications`, plus numeric columns `price`, `discount`, `rating`, `warranty_years`, `value_score`, `brand_age_years`, `product_age_years`, and `review_count`. Categorical values use one-hot encoding with unknown-category handling and deterministic token sorting; numeric values use `StandardScaler`. Missing optional metadata receives documented finite defaults, while malformed non-missing numeric values are rejected. `build_user_profile` maps a preference-only new user into the fitted product feature space and validates numeric budget bounds.
 
-**Clustering contract:** User clusters use preferred category/features and standardized budget bounds with deterministic `KMeans(random_state=seed, n_init=10)`. Cluster counts are validated to be at least 2 and no greater than the user-row count. Summaries include `cluster_id`, `count`, average budget bounds, dominant category, and common features.
+**Clustering contract:** User clusters use preferred category/features and standardized budget bounds with deterministic `KMeans(random_state=seed, n_init=10)`. Cluster counts are validated to be at least 2, no greater than the user-row count, and no greater than the number of distinct encoded feature rows. Summaries validate finite integral labels before conversion and include `cluster_id`, `count`, average budget bounds, dominant category, and common features.
 
 **Commands run:**
 
 - `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest tests/test_features.py tests/test_clustering.py -v` — **7 passed**.
 - `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest -q` — **15 passed**.
 
+**Review fixes:** Strict malformed numeric metadata handling, deterministic feature-token canonicalization, cluster label validation, duplicate-feature-row cluster-count validation, redundant profile assignment removal, and synchronized `AGENT.md` Phase 3/Phase 4 handoff were completed in the follow-up commit.
+
 **Deferred work:** Integrating the reusable feature encoder into the baseline and cold-start recommenders, plus later evaluation/UI work, remains for subsequent phases.
+
+## Phase 3 review-fix checkpoint
+
+**Date:** 2026-11-10
+
+**Files changed:** `src/features.py`, `src/clustering.py`, `tests/test_features.py`, `tests/test_clustering.py`, `PROJECT_PROGRESS.md`, and `AGENT.md`.
+
+**Verification:** Focused Phase 3 tests: 13 passed. Full suite: 21 passed. `git diff --check`: clean.
+
+**Next step:** Implement Phase 4 baseline and cold-start-aware recommenders using the reusable feature encoder.
 
 
 ## Read this first

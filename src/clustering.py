@@ -37,10 +37,14 @@ def _user_feature_frame(users: pd.DataFrame) -> pd.DataFrame:
 
 
 def _normalise(value: Any) -> str:
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return "Unknown"
     if isinstance(value, (list, tuple, set)):
-        return "|".join(str(item) for item in value)
-    text = str(value).strip()
-    return text or "Unknown"
+        tokens = [str(item).strip() for item in value]
+    else:
+        tokens = [token.strip() for token in str(value).split("|")]
+    tokens = sorted({token for token in tokens if token})
+    return "|".join(tokens) or "Unknown"
 
 
 def fit_user_clusters(users: pd.DataFrame, n_clusters: int = 3, seed: int = 42) -> object:
@@ -66,6 +70,11 @@ def fit_user_clusters(users: pd.DataFrame, n_clusters: int = 3, seed: int = 42) 
         verbose_feature_names_out=False,
     )
     matrix = np.asarray(encoder.fit_transform(frame), dtype=float)
+    distinct_rows = np.unique(matrix, axis=0).shape[0]
+    if n_clusters > distinct_rows:
+        raise ValueError(
+            "n_clusters cannot exceed the number of distinct feature rows"
+        )
     model = KMeans(n_clusters=int(n_clusters), random_state=seed, n_init=10)
     model.fit(matrix)
     model.feature_encoder_ = encoder
@@ -74,13 +83,29 @@ def fit_user_clusters(users: pd.DataFrame, n_clusters: int = 3, seed: int = 42) 
     return model
 
 
+def _validate_cluster_labels(labels: np.ndarray, expected_length: int) -> np.ndarray:
+    labels_array = np.asarray(labels)
+    if labels_array.ndim != 1 or len(labels_array) != expected_length:
+        raise ValueError("labels must contain exactly one value per user")
+    try:
+        numeric_labels = labels_array.astype(float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("labels must contain finite integers") from exc
+    if not np.isfinite(numeric_labels).all():
+        raise ValueError("labels must contain finite integers")
+    if not np.equal(numeric_labels, np.floor(numeric_labels)).all():
+        raise ValueError("labels must contain integers")
+    int_info = np.iinfo(np.int64)
+    if (numeric_labels < int_info.min).any() or (numeric_labels > int_info.max).any():
+        raise ValueError("labels must contain integers within the supported range")
+    return numeric_labels.astype(np.int64)
+
+
 def summarize_clusters(users: pd.DataFrame, labels: np.ndarray) -> pd.DataFrame:
     """Return counts and preference aggregates for each assigned cluster."""
     if not isinstance(users, pd.DataFrame):
         raise TypeError("users must be a pandas DataFrame")
-    labels_array = np.asarray(labels)
-    if labels_array.ndim != 1 or len(labels_array) != len(users):
-        raise ValueError("labels must contain exactly one value per user")
+    labels_array = _validate_cluster_labels(labels, len(users))
     if len(users) == 0:
         return pd.DataFrame(
             columns=[
@@ -95,7 +120,7 @@ def summarize_clusters(users: pd.DataFrame, labels: np.ndarray) -> pd.DataFrame:
     _user_feature_frame(users)
 
     assigned = users.copy()
-    assigned["cluster_id"] = labels_array.astype(int)
+    assigned["cluster_id"] = labels_array
     rows = []
     for cluster_id, group in assigned.groupby("cluster_id", sort=True):
         rows.append(

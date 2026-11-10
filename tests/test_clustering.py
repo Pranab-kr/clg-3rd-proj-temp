@@ -31,3 +31,31 @@ def test_cluster_count_must_fit_number_of_users():
 
     with pytest.raises(ValueError, match="n_clusters"):
         fit_user_clusters(users, n_clusters=4, seed=42)
+
+
+def test_cluster_count_must_fit_distinct_user_feature_rows():
+    users = generate_users(seed=42, n_users=3)
+    users["preferred_category"] = "Television"
+    users["preferred_features"] = "4K|HDR"
+    users["budget_min"] = 400.0
+    users["budget_max"] = 900.0
+
+    with pytest.raises(ValueError, match="distinct feature rows"):
+        fit_user_clusters(users, n_clusters=2, seed=42)
+
+
+def test_cluster_summary_rejects_non_finite_or_non_integral_labels():
+    users = generate_users(seed=42, n_users=3)
+
+    with pytest.raises(ValueError, match="finite"):
+        summarize_clusters(users, np.array([0.0, np.nan, 1.0]))
+    with pytest.raises(ValueError, match="integers"):
+        summarize_clusters(users, np.array([0.0, 1.5, 1.0]))
+
+
+def test_cluster_summary_accepts_integral_float_labels():
+    users = generate_users(seed=42, n_users=3)
+
+    summary = summarize_clusters(users, np.array([0.0, 1.0, 1.0]))
+
+    assert summary["count"].sum() == len(users)
