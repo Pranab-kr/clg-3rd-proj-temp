@@ -3,9 +3,27 @@
 **Project:** Cold-Start-Aware Electronics Recommendation System
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
-**Last updated:** 2026-11-10
-**Current phase:** Phase 4 — baseline and cold-start-aware recommenders complete
-**Implementation status:** Phase 4 complete; Phase 5 classification comparison is next
+**Last updated:** 2026-11-11
+**Current phase:** Phase 5 — classification comparison complete
+**Implementation status:** Phase 5 complete; Phase 6 recommendation evaluation and experiment outputs are next
+
+## Phase 5 checkpoint
+
+**Date:** 2026-11-11
+
+**Files created:** `src/classification.py` and `tests/test_classification.py`.
+
+**Classification contract:** `make_classification_dataset` joins synthetic interactions to user-preference and product-metadata features. It labels views as `0` and wishlist/cart/purchase events as `1` using `interaction_strength >= 2`; this target is a proxy engagement label, **not** purchase intent. `compare_classifiers` uses a deterministic 75/25 stratified holdout with preprocessing inside each model pipeline to avoid leakage, then compares Logistic Regression, Decision Tree, Random Forest, and K-Nearest Neighbors using accuracy, precision, recall, and F1. One-class and undersized inputs receive clear validation errors. `classification_report_table` exposes standard per-class metrics.
+
+**Deep-learning decision:** No neural baseline was added. It is optional and deferred because the core evaluation and Streamlit phases remain incomplete; the four classical models fully meet the required learning comparison.
+
+**Commands run:**
+
+- `.venv/Scripts/python.exe -m pytest -q` before Phase 5 — **33 passed**.
+- `.venv/Scripts/python.exe -m pytest tests/test_classification.py -v` — **5 passed**.
+- `.venv/Scripts/python.exe -m pytest -q` after Phase 5 — **38 passed**.
+
+**Deferred work:** Recommendation evaluation/experiment outputs, Streamlit UI, and report/PPT artifacts remain for later phases. Classification metrics are computed only from generated synthetic data and will not be reported as real shopper behavior.
 
 ## Phase 4 checkpoint
 
