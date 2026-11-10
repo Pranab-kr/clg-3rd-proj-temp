@@ -4,8 +4,26 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-10
-**Current phase:** Phase 2 — synthetic data generation and validation complete
-**Implementation status:** Phase 2 complete; Phase 3 not started
+**Current phase:** Phase 3 — feature preparation and user clustering complete
+**Implementation status:** Phase 3 complete; Phase 4 recommender work is next
+
+## Phase 3 checkpoint
+
+**Date:** 2026-11-10
+
+**Files created:** `src/features.py`, `src/clustering.py`, `tests/test_features.py`, and `tests/test_clustering.py`.
+
+**Feature contract:** Product features use stable categorical columns `category` and `key_specifications`, plus numeric columns `price`, `discount`, `rating`, `warranty_years`, `value_score`, `brand_age_years`, `product_age_years`, and `review_count`. Categorical values use one-hot encoding with unknown-category handling; numeric values use `StandardScaler`. Missing optional metadata receives documented finite defaults. `build_user_profile` maps a preference-only new user into the fitted product feature space and validates numeric budget bounds.
+
+**Clustering contract:** User clusters use preferred category/features and standardized budget bounds with deterministic `KMeans(random_state=seed, n_init=10)`. Cluster counts are validated to be at least 2 and no greater than the user-row count. Summaries include `cluster_id`, `count`, average budget bounds, dominant category, and common features.
+
+**Commands run:**
+
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest tests/test_features.py tests/test_clustering.py -v` — **7 passed**.
+- `/c/Users/prana/Downloads/coding/cold-start-electronics-recommender/.venv/Scripts/python.exe -m pytest -q` — **15 passed**.
+
+**Deferred work:** Integrating the reusable feature encoder into the baseline and cold-start recommenders, plus later evaluation/UI work, remains for subsequent phases.
+
 
 ## Read this first
 
@@ -48,30 +66,33 @@ The application is not an Amazon clone and must not claim to use Amazon's privat
 - Added `tests/test_config.py` and verified the configuration contract.
 - Created a project-local `.venv` and installed the full dependency manifest there; the earlier system-level pytest installation remains outside the repository but is not used for project verification.
 - Completed Phase 2: created `src/data_generation.py`, `src/data_validation.py`, `scripts/generate_data.py`, Phase 2 tests, and generated the local synthetic CSV snapshot under `data/`.
+- Completed Phase 3: created stable product/user feature preparation, new-user profile encoding, deterministic K-Means clustering, interpretable cluster summaries, and focused tests.
 - No recommender model, app, report file, or PPT file has been created yet.
 
 ## Approval gate
 
-The design and implementation plan were authorized for Phase 1 by the current task. The project must still stay within the approved design scope. Do not add unrelated product features or present synthetic data as real customer behavior.
+The approved design and implementation plan remain authoritative. The project must stay within the synthetic, explainable cold-start scope. Do not add unrelated product features or present synthetic data as real customer behavior.
 
 ## Next agent instructions
 
 1. Read this file and `AGENT.md`.
 2. Read the design document and implementation plan before changing the implementation.
-3. Treat Phase 1 as complete; begin with Phase 2 only after confirming the configuration test still passes.
-4. Keep the core path small: data generator → preprocessing/features → baseline → cold-start recommender → evaluation → Streamlit demo.
-5. Follow the plan's test-first sequence for each phase.
-6. Verify each stage before moving on, and update this file with date, status, files created, commands run, and test results.
+3. Treat Phases 1–3 as complete; begin Phase 4 recommender work after confirming the full suite passes.
+4. Reuse the fitted feature encoder from `src/features.py`; do not duplicate product feature preparation in recommender logic.
+5. Keep the core path small: data generator → preprocessing/features → baseline → cold-start recommender → evaluation → Streamlit demo.
+6. Follow the plan's test-first sequence for each phase.
+7. Verify each stage before moving on, and update this file with date, status, files created, commands run, and test results.
 
 ## Planned phases after approval
 
 1. **Complete:** Project skeleton and configuration.
-2. Data validation, preprocessing, and reproducible synthetic dataset.
-3. Baseline recommender and cold-start-aware recommender.
-4. Classification comparison and K-Means clustering demonstration.
-5. Evaluation metrics and charts.
-6. Streamlit demo with recommendation explanations.
-7. Report/PPT assets, smoke testing, and final verification.
+2. **Complete:** Data validation, preprocessing, and reproducible synthetic dataset.
+3. **Complete:** Feature preparation, new-user profiles, and K-Means clustering.
+4. Baseline recommender and cold-start-aware recommender.
+5. Classification comparison.
+6. Evaluation metrics and charts.
+7. Streamlit demo with recommendation explanations.
+8. Report/PPT assets, smoke testing, and final verification.
 
 ## Phase 1 checkpoint
 
