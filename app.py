@@ -15,7 +15,7 @@ from src.demo import (
     load_saved_comparison,
     price_bounds,
     recommend_for_known_user,
-    recommend_for_preferences,
+    recommend_for_new_user,
 )
 
 st.set_page_config(page_title="Cold-Start Electronics Recommender", layout="wide")
@@ -114,16 +114,16 @@ def main() -> None:
             "Budget", int(low), int(high) + 1, (int(low), int(high) + 1), step=10
         )
         features = st.sidebar.multiselect("Preferred features", feature_options(products, category))
-        st.caption("No account or purchase history is used for this user.")
+        st.caption(
+            "This user has no history. The baseline shows catalog-wide popularity; "
+            "the proposed method uses only the preferences below."
+        )
         if budget[0] >= budget[1]:
             st.error("Budget minimum must be below the maximum.")
         else:
             prefs = build_preferences(category, budget[0], budget[1], features)
-            empty_history = data["interactions"].iloc[0:0]
             try:
-                result = recommend_for_preferences(
-                    products, empty_history, prefs, exposure_weight=exposure
-                )
+                result = recommend_for_new_user(data, prefs, exposure_weight=exposure)
                 _show_tables(result)
             except ValueError as exc:
                 st.error(str(exc))

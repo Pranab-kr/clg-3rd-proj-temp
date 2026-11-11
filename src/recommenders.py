@@ -114,6 +114,7 @@ def popular_recommendations(
 
     frame = products.copy()
     activity = _interaction_counts(frame, interactions)
+    frame["activity"] = activity
     activity_score = _min_max(activity)
     rating_score = _min_max(_numeric_series(frame, "rating"))
     review_score = _min_max(_numeric_series(frame, "review_count"))

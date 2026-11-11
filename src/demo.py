@@ -96,6 +96,27 @@ def recommend_for_preferences(
     }
 
 
+def recommend_for_new_user(
+    data: dict[str, pd.DataFrame],
+    preferences: dict[str, Any],
+    top_k: int = TOP_K,
+    exposure_weight: float = 0.10,
+) -> dict[str, pd.DataFrame]:
+    """Cold-start scenario: the user has no history of their own.
+
+    The baseline still ranks by the catalog's historical popularity (what a
+    marketplace would show anyone); the proposed method needs only the stated
+    preferences and product metadata.
+    """
+    return recommend_for_preferences(
+        data["products"],
+        data["interactions"],
+        preferences,
+        top_k=top_k,
+        exposure_weight=exposure_weight,
+    )
+
+
 def recommend_for_known_user(
     user_id: str, data: dict[str, pd.DataFrame], top_k: int = TOP_K
 ) -> dict[str, pd.DataFrame]:

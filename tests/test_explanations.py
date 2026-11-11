@@ -45,3 +45,19 @@ def test_reason_does_not_claim_unsupported_purchases_or_reviews():
     assert "purchased" not in reason.lower()
     assert "reviewed" not in reason.lower()
     assert reason
+
+
+def test_popularity_reason_reports_the_product_signals_actually_used():
+    from src.explanations import build_popularity_reason
+
+    product = pd.Series({"rating": 4.6, "review_count": 3200, "activity": 17})
+    reason = build_popularity_reason(product)
+    assert "4.6" in reason and "3,200" in reason and "17" in reason
+
+
+def test_popularity_reason_degrades_without_optional_signals():
+    from src.explanations import build_popularity_reason
+
+    reason = build_popularity_reason(pd.Series({"rating": float("nan")}))
+    assert reason.strip()
+    assert "nan" not in reason.lower()

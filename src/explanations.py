@@ -52,8 +52,20 @@ def build_recommendation_reason(
 
 
 def build_popularity_reason(product: pd.Series) -> str:
-    """Explain the documented signals used by the established-item baseline."""
-    return (
-        "Ranked by the baseline's historical interaction activity, rating, "
-        "and available review-count signal."
-    )
+    """Explain the documented signals used by the established-item baseline.
+
+    Only signals present on the product row are mentioned; nothing is invented.
+    """
+    parts: list[str] = []
+    activity = pd.to_numeric(product.get("activity"), errors="coerce")
+    if pd.notna(activity):
+        parts.append(f"{int(activity):,} recorded interactions")
+    rating = pd.to_numeric(product.get("rating"), errors="coerce")
+    if pd.notna(rating):
+        parts.append(f"{rating:.1f} average rating")
+    reviews = pd.to_numeric(product.get("review_count"), errors="coerce")
+    if pd.notna(reviews):
+        parts.append(f"{int(reviews):,} reviews")
+    if not parts:
+        return "Ranked by the baseline's historical interaction, rating, and review signals."
+    return "Ranked by popularity signals: " + ", ".join(parts) + "."

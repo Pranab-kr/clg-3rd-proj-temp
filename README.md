@@ -41,7 +41,7 @@ python -m pytest -q
 # Run experiments (Phase 6): writes tables, charts, and metadata under results/
 .venv/Scripts/python.exe scripts/run_experiments.py --seed 42
 
-# Launch the Streamlit demo (Phase 7)
+# Launch the Streamlit demo (Phase 7); walkthrough in docs/demo-script.md
 .venv/Scripts/python.exe -m streamlit run app.py
 ```
 

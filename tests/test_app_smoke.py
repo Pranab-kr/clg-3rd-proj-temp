@@ -108,3 +108,20 @@ def test_streamlit_app_renders_every_scenario_without_exception():
         assert not app.error
     app.sidebar.radio[0].set_value("Existing synthetic user").run()
     assert not app.exception
+
+
+def test_new_user_baseline_uses_catalog_history_but_proposed_needs_none(data):
+    from src.demo import recommend_for_new_user
+    from src.recommenders import popular_recommendations
+
+    prefs = {
+        "preferred_category": "Television",
+        "budget_min": 300.0,
+        "budget_max": 1800.0,
+        "preferred_features": "4K|HDR",
+    }
+    result = recommend_for_new_user(data, prefs)
+    expected = popular_recommendations(data["products"], data["interactions"])
+    pd.testing.assert_frame_equal(result["baseline"], expected)
+    assert not result["baseline"]["is_new_item"].any()
+    assert result["proposed"]["is_new_item"].any()

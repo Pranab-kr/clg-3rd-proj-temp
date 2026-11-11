@@ -4,8 +4,35 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-11
-**Current phase:** Phase 7 — Streamlit demo complete
-**Implementation status:** Phase 7 complete; Phase 8 (integration, end-to-end verification, demo script, team/HOD demo) is next. Report and PPT (Phase 9) come last, after demo approval.
+**Current phase:** Phase 8 — integration and demo preparation complete; awaiting team/HOD demo
+**Implementation status:** Phase 8 steps 1–5 and 7 complete. Step 6 (show the demo to the team and HOD, record feedback) is pending and is a human step. Report and PPT (Phase 9) must not start until the user confirms the demo is approved.
+
+## Phase 8 checkpoint
+
+**Date:** 2026-11-11
+
+**Files created:** `docs/demo-script.md`, `tests/test_project_smoke.py`. **Changed:** `src/explanations.py`, `src/recommenders.py`, `src/demo.py`, `app.py`, `tests/test_app_smoke.py`, `tests/test_explanations.py`, `PROJECT_PROGRESS.md`, `AGENT.md`.
+
+**End-to-end smoke test:** `tests/test_project_smoke.py` runs `generate_data.py` and `run_experiments.py` as subprocesses into temp directories and checks: new items have zero interactions and a new user exists; experiment metadata matches the generated table sizes; saved comparison equals a fresh evaluation; the proposed method wins coverage/new-item exposure/relevant-new-item rate and the baseline has zero new-item exposure; the Television new-user scenario surfaces new items only in the proposed list; results CSVs are byte-identical across runs.
+
+**Rehearsal findings and fixes (found by running the demo script from the app helpers):**
+1. The new-user scenario passed an **empty history** to the baseline, so the baseline looked like a rating/review ranking rather than a popularity baseline, and its reason text was a generic sentence for every row. Fixed: new `recommend_for_new_user` keeps the catalog history for the baseline (the new user has none of their own) while the proposed method uses only preferences. The Phase 7 limitation about the empty-history baseline no longer applies. Test written first (`test_new_user_baseline_uses_catalog_history_but_proposed_needs_none`), failed, then passed.
+2. Baseline reasons were identical boilerplate. Fixed: `build_popularity_reason` now reports the product's actual interaction count, rating, and review count, and degrades cleanly when signals are missing. `popular_recommendations` now adds an `activity` column to feed it. Tests written first, failed, then passed. Baseline scores/ranks and experiment metrics are unchanged: `results/recommender_comparison.csv` was diffed before and after and is identical.
+3. A draft demo-script claim that setting the exposure slider to 0 removes new items was checked and was false; at weight 0 (Television, 300–1000, 4K/HDR) two new items still rank in the top 5. The script now states that.
+
+**Limitations surfaced during rehearsal (documented in the demo script, not fixed):** budget is a soft penalty, so over-budget new items can appear for a 300–1000 Television budget (NovaLaunch4 at 1,432 and NovaLaunch7 at 1,298); new-item share of the proposed top 5 is high and driven mostly by relevance and quality, not the exposure boost.
+
+**Commands run (clean state: data CSVs and results deleted first):**
+
+- `.venv/Scripts/python.exe -m pytest tests/test_project_smoke.py -q` — **6 passed** (written before any code change this phase; it exercises existing code, so it passed immediately).
+- `.venv/Scripts/python.exe scripts/generate_data.py --seed 42` — validation passed (120 products, 80 users, 1,200 interactions).
+- `.venv/Scripts/python.exe scripts/run_experiments.py --seed 42` — wrote all result files; values identical to Phase 6 (see table there).
+- `.venv/Scripts/python.exe -m pytest -q` — **72 passed**.
+- `.venv/Scripts/python.exe -m streamlit run app.py --server.headless true --server.port 8599` — health endpoint HTTP 200, no errors in log; server stopped.
+
+**Not done / human steps:** The page was still not opened in a visual browser and no screenshots were taken, so the demo script's on-screen wording (banner, tags) is verified only through the headless AppTest and the helper outputs. **Step 6 (demo to team and HOD) and recording their feedback have not happened.** Do not start Task 9 (report and PPT) until the user confirms approval.
+
+**Deferred work:** Feedback from the team/HOD; Phase 9 report/PPT; optional neural baseline.
 
 ## Phase 7 checkpoint
 
@@ -204,7 +231,7 @@ The approved design and implementation plan remain authoritative. The project mu
 
 1. Read this file and `AGENT.md`.
 2. Read the design document and implementation plan before changing the implementation.
-3. Treat Phases 1–7 as complete; begin Phase 8 (integration, demo script, rehearsal) after confirming the full suite passes. Do not start the report/PPT (Phase 9) until the user confirms the team/HOD demo is approved.
+3. Treat Phases 1–8 as complete except the human demo review gate. Confirm the full suite passes, then record team/HOD feedback and apply requested changes test-first. Do not start Phase 9 until the user confirms the demo is approved. Do not start the report/PPT (Phase 9) until the user confirms the team/HOD demo is approved.
 4. Reuse the fitted feature encoder from `src/features.py`; do not duplicate product feature preparation in recommender logic.
 5. Keep the core path small: data generator → preprocessing/features → baseline → cold-start recommender → evaluation → Streamlit demo.
 6. Follow the plan's test-first sequence for each phase.
@@ -219,7 +246,7 @@ The approved design and implementation plan remain authoritative. The project mu
 5. **Complete:** Classification comparison.
 6. **Complete:** Evaluation metrics and charts.
 7. **Complete:** Streamlit demo with recommendation explanations.
-8. Whole-project integration, end-to-end verification, demo script, and rehearsal; then **demo to the team and HOD** and apply their feedback. No report or PPT work in this phase.
+8. **Complete except demo review gate (human):** Whole-project integration, end-to-end verification, demo script, and rehearsal; then **demo to the team and HOD** and apply their feedback. No report or PPT work in this phase.
 9. Report and PPT, written **last** and only after the user confirms the demo is approved; every number comes from the approved version's `results/` outputs.
 
 ## Phase 1 checkpoint
