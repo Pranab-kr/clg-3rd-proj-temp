@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
@@ -82,6 +83,16 @@ def fit_user_clusters(users: pd.DataFrame, n_clusters: int = 3, seed: int = 42) 
     model.user_feature_columns_ = tuple(_USER_CATEGORICAL_FEATURES + _USER_NUMERIC_FEATURES)
     model.user_ids_ = users["user_id"].to_numpy(copy=True) if "user_id" in users else None
     return model
+
+
+def cluster_silhouette(users: pd.DataFrame, model: object) -> float:
+    """Silhouette score of a fitted user-cluster model on the given users."""
+    frame = _user_feature_frame(users)
+    matrix = np.asarray(model.feature_encoder_.transform(frame), dtype=float)
+    labels = model.predict(matrix)
+    if len(np.unique(labels)) < 2:
+        raise ValueError("silhouette score needs at least two non-empty clusters")
+    return float(silhouette_score(matrix, labels))
 
 
 def _validate_cluster_labels(labels: np.ndarray, expected_length: int) -> np.ndarray:

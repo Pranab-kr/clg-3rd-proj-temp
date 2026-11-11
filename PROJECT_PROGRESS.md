@@ -4,8 +4,42 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-11
-**Current phase:** Phase 5 — classification comparison complete
-**Implementation status:** Phase 5 complete; Phase 6 recommendation evaluation and experiment outputs are next
+**Current phase:** Phase 6 — evaluation metrics and experiment outputs complete
+**Implementation status:** Phase 6 complete; Phase 7 Streamlit demo (`app.py`) is next
+
+## Phase 6 checkpoint
+
+**Date:** 2026-11-11
+
+**Files created:** `src/evaluation.py`, `scripts/run_experiments.py`, `tests/test_evaluation.py`, `tests/test_run_experiments.py`, `results/.gitkeep`. **Changed:** `src/clustering.py` (added `cluster_silhouette`), `tests/test_clustering.py`, `README.md`, `AGENT.md`.
+
+**Evaluation protocol:** Simulated-time leave-one-out. Row order of interactions is treated as time; each user with at least two interactions and a positive one (`interaction_strength >= 2`) has their latest positive held out as the single relevant item. Both methods use the same 80 users, K=5, and training history, with already-seen items excluded. New items have no interactions by design, so they can never be held-out positives; a new item counts as "relevant" for a user by content (preferred category and price within budget). Metrics: Precision@K, Recall@K, catalog coverage, new-item exposure (share of recommendation slots), relevant-new-item rate, average rating, average value score.
+
+**Actual results (synthetic data, seed 42, K=5, 80 users), from `python scripts/run_experiments.py --seed 42`:**
+
+| method | P@5 | R@5 | coverage | new-item exposure | relevant new items surfaced | avg rating | avg value |
+|---|---|---|---|---|---|---|---|
+| baseline | 0.0150 | 0.0750 | 0.092 | 0.000 | 0.00 | 4.486 | 0.610 |
+| proposed | 0.0025 | 0.0125 | 0.217 | 0.6875 | 1.00 | 4.446 | 0.686 |
+
+Classifiers (proxy engagement label, 75/25 stratified holdout): accuracy 0.51–0.56, F1 0.23–0.40 (Random Forest best F1 0.404). K-Means (k=3) clusters split by category/budget; silhouette score 0.304 (also in `results/experiment_metadata.json`).
+
+**Honest findings and limitations:**
+- The proposed method **loses on Precision@5 and Recall@5** against the popularity baseline. This is expected from the synthetic design: interactions are generated uniformly at random over non-new products, so historical positives carry no preference signal, and popularity is the best predictor of a random held-out item. These relevance numbers must be reported as-is; do not present the proposed method as more accurate.
+- The proposed method's wins are on the cold-start goals: catalog coverage (0.22 vs 0.09), new-item exposure (0.69 vs 0), and surfacing relevant new items (1.00 vs 0), with average rating nearly unchanged (4.45 vs 4.49) and higher average value score (0.69 vs 0.61).
+- New-item exposure of 0.69 is high. The exposure weight is bounded (default 0.10), but the synthetic new items also have high discount, rating, and warranty, so they win on relevance and quality alone. Not tuned; worth stating in the report.
+- Classifier accuracy is near chance because the synthetic engagement label is random relative to features. Report as illustrative only.
+- Only one held-out item per user, so precision/recall are coarse.
+
+**Commands run:**
+
+- `.venv/Scripts/python.exe -m pytest tests/test_evaluation.py -q` before implementation — collection error (module missing), then **10 passed**.
+- `.venv/Scripts/python.exe -m pytest tests/test_run_experiments.py -q` — **3 passed** (after a collection failure first).
+- `.venv/Scripts/python.exe -m pytest tests/test_clustering.py -q` — failed first on missing `cluster_silhouette`, then **9 passed**.
+- `.venv/Scripts/python.exe scripts/run_experiments.py --seed 42` — wrote 3 CSVs, 2 PNG charts, and `experiment_metadata.json` under `results/`; charts visually inspected.
+- `.venv/Scripts/python.exe -m pytest -q` — **53 passed**.
+
+**Deferred work:** Streamlit UI, report/PPT artifacts, and the optional neural baseline remain. Generated `results/` outputs are Git-ignored; regenerate with the command above.
 
 ## Phase 5 checkpoint
 
@@ -159,9 +193,9 @@ The approved design and implementation plan remain authoritative. The project mu
 1. **Complete:** Project skeleton and configuration.
 2. **Complete:** Data validation, preprocessing, and reproducible synthetic dataset.
 3. **Complete:** Feature preparation, new-user profiles, and K-Means clustering.
-4. Baseline recommender and cold-start-aware recommender.
-5. Classification comparison.
-6. Evaluation metrics and charts.
+4. **Complete:** Baseline recommender and cold-start-aware recommender.
+5. **Complete:** Classification comparison.
+6. **Complete:** Evaluation metrics and charts.
 7. Streamlit demo with recommendation explanations.
 8. Report/PPT assets, smoke testing, and final verification.
 

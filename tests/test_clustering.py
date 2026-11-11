@@ -85,3 +85,14 @@ def test_cluster_summary_rejects_integer_labels_outside_int64_range():
         summarize_clusters(users, np.array([np.uint64(2**64 - 1), 1, 1]))
     with pytest.raises(ValueError, match="supported range"):
         summarize_clusters(users, np.array([float(2**63), 1.0, 1.0]))
+
+
+def test_cluster_silhouette_score_is_bounded_and_deterministic():
+    from src.clustering import cluster_silhouette
+    from src.data_generation import generate_users
+
+    users = generate_users(seed=42)
+    model = fit_user_clusters(users, n_clusters=3, seed=42)
+    score = cluster_silhouette(users, model)
+    assert -1.0 <= score <= 1.0
+    assert score == cluster_silhouette(users, fit_user_clusters(users, n_clusters=3, seed=42))

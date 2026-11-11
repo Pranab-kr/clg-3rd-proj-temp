@@ -38,8 +38,10 @@ python -m pytest -q
 # Generate the Phase 2 synthetic CSV snapshot
 .venv/Scripts/python.exe scripts/generate_data.py --seed 42
 
-# Planned commands after the corresponding phases exist
+# Run experiments (Phase 6): writes tables, charts, and metadata under results/
 .venv/Scripts/python.exe scripts/run_experiments.py --seed 42
+
+# Planned command after the Streamlit phase exists
 streamlit run app.py
 ```
 
