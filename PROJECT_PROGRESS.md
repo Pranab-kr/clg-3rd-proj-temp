@@ -4,8 +4,30 @@
 **Level:** Third-year semester project
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-11
-**Current phase:** Phase 6 — evaluation metrics and experiment outputs complete
-**Implementation status:** Phase 6 complete; Phase 7 Streamlit demo (`app.py`) is next, then Phase 8 integration and the team/HOD demo. Report and PPT (Phase 9) come last, after demo approval.
+**Current phase:** Phase 7 — Streamlit demo complete
+**Implementation status:** Phase 7 complete; Phase 8 (integration, end-to-end verification, demo script, team/HOD demo) is next. Report and PPT (Phase 9) come last, after demo approval.
+
+## Phase 7 checkpoint
+
+**Date:** 2026-11-11
+
+**Files created:** `app.py`, `src/demo.py`, `tests/test_app_smoke.py`. **Changed:** `README.md` (launch command), `AGENT.md`.
+
+**Design:** `app.py` is a thin Streamlit entry point. Data loading (saved CSVs, validated, with regeneration from the seed as fallback), feature/budget helpers, recommendation calls, and loading of saved experiment results live in `src/demo.py` so they are testable without a browser. The app shows a synthetic-data notice and a short cold-start explanation. Two scenarios: **New user (preferences)** with category, budget, preferred-feature, and exposure-weight (0–0.25) controls and an empty interaction history (no authentication), and **Existing synthetic user**. Baseline and proposed top-5 tables are side by side; every row shows its reason; new zero-history items are tagged. A panel shows `results/recommender_comparison.csv` when present, with a note that the proposed method does not win on Precision/Recall.
+
+**Commands run:**
+
+- `.venv/Scripts/python.exe -m pytest -q` before Phase 7 — **53 passed**.
+- `.venv/Scripts/python.exe -m pytest tests/test_app_smoke.py -q` before implementation — collection error (`src.demo` missing); after — **9 passed**. A headless `streamlit.testing` AppTest was then added; it first failed on a relative app path (`FileNotFoundError`), fixed by using an absolute path, then **10 passed**.
+- Headless AppTest walk-through of Television/Phone/Laptop new-user scenarios and the existing-user scenario — no exceptions, no `st.error` output.
+- `.venv/Scripts/python.exe -m streamlit run app.py --server.headless true --server.port 8599` — health endpoint and page both returned HTTP 200, no errors in the log; server stopped afterwards.
+- `.venv/Scripts/python.exe -m pytest -q` after Phase 7 — **63 passed**.
+
+**Manual verification not done:** The page was not opened in a visual browser and no screenshots were captured. Plan Task 7 Step 5 (visually confirm the Television scenario) is left for the Phase 8 rehearsal. The headless run did show a new-item row with its reason (e.g., a NovaLaunch Television tagged as a new item with no assumed history).
+
+**Known UI limitations:** The new-user scenario deliberately passes an empty history, so the baseline reduces to rating/review-count ranking and never shows new items. The results panel reads saved CSVs, so it is stale until `run_experiments.py` is rerun. New-item share in the proposed top-5 is high (see Phase 6 findings); it is not tuned.
+
+**Deferred work:** Phase 8 integration, demo script, and rehearsal; Phase 9 report/PPT after approval.
 
 ## Phase 6 checkpoint
 
@@ -172,7 +194,7 @@ The application is not an Amazon clone and must not claim to use Amazon's privat
 - Created a project-local `.venv` and installed the full dependency manifest there; the earlier system-level pytest installation remains outside the repository but is not used for project verification.
 - Completed Phase 2: created `src/data_generation.py`, `src/data_validation.py`, `scripts/generate_data.py`, Phase 2 tests, and generated the local synthetic CSV snapshot under `data/`.
 - Completed Phase 3: created stable product/user feature preparation, new-user profile encoding, deterministic K-Means clustering, interpretable cluster summaries, and focused tests.
-- No recommender model, app, report file, or PPT file has been created yet.
+- Phases 4–7 added recommenders, classification, evaluation, and the Streamlit demo. No report file or PPT file has been created yet (deliberately deferred until demo approval).
 
 ## Approval gate
 
@@ -182,7 +204,7 @@ The approved design and implementation plan remain authoritative. The project mu
 
 1. Read this file and `AGENT.md`.
 2. Read the design document and implementation plan before changing the implementation.
-3. Treat Phases 1–6 as complete; begin Phase 7 (Streamlit demo) after confirming the full suite passes. Do not start the report/PPT (Phase 9) until the user confirms the team/HOD demo is approved.
+3. Treat Phases 1–7 as complete; begin Phase 8 (integration, demo script, rehearsal) after confirming the full suite passes. Do not start the report/PPT (Phase 9) until the user confirms the team/HOD demo is approved.
 4. Reuse the fitted feature encoder from `src/features.py`; do not duplicate product feature preparation in recommender logic.
 5. Keep the core path small: data generator → preprocessing/features → baseline → cold-start recommender → evaluation → Streamlit demo.
 6. Follow the plan's test-first sequence for each phase.
@@ -196,7 +218,7 @@ The approved design and implementation plan remain authoritative. The project mu
 4. **Complete:** Baseline recommender and cold-start-aware recommender.
 5. **Complete:** Classification comparison.
 6. **Complete:** Evaluation metrics and charts.
-7. Streamlit demo with recommendation explanations.
+7. **Complete:** Streamlit demo with recommendation explanations.
 8. Whole-project integration, end-to-end verification, demo script, and rehearsal; then **demo to the team and HOD** and apply their feedback. No report or PPT work in this phase.
 9. Report and PPT, written **last** and only after the user confirms the demo is approved; every number comes from the approved version's `results/` outputs.
 

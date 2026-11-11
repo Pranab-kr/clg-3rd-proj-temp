@@ -41,8 +41,8 @@ python -m pytest -q
 # Run experiments (Phase 6): writes tables, charts, and metadata under results/
 .venv/Scripts/python.exe scripts/run_experiments.py --seed 42
 
-# Planned command after the Streamlit phase exists
-streamlit run app.py
+# Launch the Streamlit demo (Phase 7)
+.venv/Scripts/python.exe -m streamlit run app.py
 ```
 
 For project scope, architecture, constraints, and the current handoff, read `AGENT.md`, `PROJECT_PROGRESS.md`, and the design and implementation plan under `docs/superpowers/`.
