@@ -5,7 +5,7 @@
 **Time budget:** 10 days, approximately 1 hour per day
 **Last updated:** 2026-11-11
 **Current phase:** Phase 6 — evaluation metrics and experiment outputs complete
-**Implementation status:** Phase 6 complete; Phase 7 Streamlit demo (`app.py`) is next
+**Implementation status:** Phase 6 complete; Phase 7 Streamlit demo (`app.py`) is next, then Phase 8 integration and the team/HOD demo. Report and PPT (Phase 9) come last, after demo approval.
 
 ## Phase 6 checkpoint
 
@@ -182,7 +182,7 @@ The approved design and implementation plan remain authoritative. The project mu
 
 1. Read this file and `AGENT.md`.
 2. Read the design document and implementation plan before changing the implementation.
-3. Treat Phases 1–3 as complete; begin Phase 4 recommender work after confirming the full suite passes.
+3. Treat Phases 1–6 as complete; begin Phase 7 (Streamlit demo) after confirming the full suite passes. Do not start the report/PPT (Phase 9) until the user confirms the team/HOD demo is approved.
 4. Reuse the fitted feature encoder from `src/features.py`; do not duplicate product feature preparation in recommender logic.
 5. Keep the core path small: data generator → preprocessing/features → baseline → cold-start recommender → evaluation → Streamlit demo.
 6. Follow the plan's test-first sequence for each phase.
@@ -197,7 +197,8 @@ The approved design and implementation plan remain authoritative. The project mu
 5. **Complete:** Classification comparison.
 6. **Complete:** Evaluation metrics and charts.
 7. Streamlit demo with recommendation explanations.
-8. Report/PPT assets, smoke testing, and final verification.
+8. Whole-project integration, end-to-end verification, demo script, and rehearsal; then **demo to the team and HOD** and apply their feedback. No report or PPT work in this phase.
+9. Report and PPT, written **last** and only after the user confirms the demo is approved; every number comes from the approved version's `results/` outputs.
 
 ## Phase 1 checkpoint
 

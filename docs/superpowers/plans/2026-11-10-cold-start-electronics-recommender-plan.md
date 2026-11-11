@@ -399,38 +399,26 @@ Record launch command, manual scenario, screenshots captured if any, and known U
 
 ---
 
-### Task 8: Prepare report, PPT, final documentation, and verification
+### Task 8: Integrate, harden, and prepare the team/HOD demo (no report or PPT yet)
+
+**Goal:** the whole project works end to end and is ready to be shown to the project team and HOD. Report and PPT are deliberately *not* started here; they follow in Task 9 only after the demo is approved.
 
 **Files:**
-- Create: `docs/report.md`
-- Create: `docs/presentation-outline.md` or `docs/presentation.pptx` if generation tooling is available
-- Create: `scripts/build_report.py` if a Word conversion path is selected
+- Create: `docs/demo-script.md`
+- Create: `tests/test_project_smoke.py`
 - Modify: `README.md`
 - Modify: `PROJECT_PROGRESS.md`
-- Test: `tests/test_project_smoke.py`
 
 - [ ] **Step 1: Write the final smoke test**
 
-Test that generated data, recommender imports, evaluation output, and report-input artifacts exist and are internally consistent after the documented commands run.
+Test that generated data, recommender imports, evaluation output, and the experiment result artifacts exist and are internally consistent after the documented commands run.
 
-- [ ] **Step 2: Run the full test suite before writing claims**
+- [ ] **Step 2: Run the full test suite**
 
 Run: `python -m pytest -q`
-Expected: all tests pass. If anything fails, fix or document it before preparing final artifacts.
+Expected: all tests pass. If anything fails, fix or document it before the demo.
 
-- [ ] **Step 3: Write the report from actual outputs**
-
-Follow `docs/report-and-presentation-outline.md`. Include problem, concepts, schema, methods, exact evaluation setup, actual tables/charts, screenshots, limitations, and future work. Explicitly label synthetic data and proxy labels.
-
-- [ ] **Step 4: Build the Word-compatible artifact**
-
-Prefer a generated `.docx` only if a reliable local tool is available. Otherwise provide `docs/report.md` and documented conversion instructions. Never fabricate a Word file that omits the source or results.
-
-- [ ] **Step 5: Prepare the PPT**
-
-Use the 10–12-slide outline. Keep slide text short and use actual screenshots/charts only. If `.pptx` generation is unavailable, provide a complete slide-by-slide Markdown outline suitable for manual transfer.
-
-- [ ] **Step 6: Run the end-to-end verification**
+- [ ] **Step 3: Run the end-to-end verification**
 
 Run:
 
@@ -443,9 +431,52 @@ streamlit run app.py
 
 Expected: data regenerates, metrics regenerate, tests pass, and the app demonstrates the new-item/new-user scenario.
 
-- [ ] **Step 7: Complete the handoff log**
+- [ ] **Step 4: Write the demo script**
 
-Update `PROJECT_PROGRESS.md` with final status, exact commands, test count/result, artifact paths, deferred items, and limitations. A fresh agent must be able to continue from this file without this conversation.
+Create `docs/demo-script.md`: a short, repeatable walkthrough (setup commands, the Television new-brand scenario, the new-user scenario, the baseline-versus-proposed comparison panel) plus talking points. State the limitations plainly, including that the proposed method trails the popularity baseline on Precision@K/Recall@K on the synthetic data and wins on coverage, new-item exposure, and relevant-new-item surfacing. Use only values produced by the commands above.
+
+- [ ] **Step 5: Rehearse and fix**
+
+Run the script start to finish from a clean state (fresh data and results). Fix any crash, confusing label, or unexplained number found during rehearsal, test-first where the fix is in code.
+
+- [ ] **Step 6: Demo review gate**
+
+Show the demo to the team and HOD. Record their feedback and any requested changes in `PROJECT_PROGRESS.md`, then implement the requested changes (test-first) and re-run Step 3. **Do not start Task 9 until the user confirms the demo is approved.**
+
+- [ ] **Step 7: Update the handoff log**
+
+Update `PROJECT_PROGRESS.md` with demo status, exact commands, test count/result, feedback received, and deferred items.
+
+---
+
+### Task 9: Prepare report and PPT (only after demo approval)
+
+**Files:**
+- Create: `docs/report.md`
+- Create: `docs/presentation-outline.md` or `docs/presentation.pptx` if generation tooling is available
+- Create: `scripts/build_report.py` if a Word conversion path is selected
+- Modify: `README.md`
+- Modify: `PROJECT_PROGRESS.md`
+
+- [ ] **Step 1: Confirm the approved baseline**
+
+Confirm with the user that the demo was approved. Re-run `python scripts/generate_data.py --seed 42`, `python scripts/run_experiments.py --seed 42`, and `python -m pytest -q`, so every number in the report comes from the approved version of the code.
+
+- [ ] **Step 2: Write the report from actual outputs**
+
+Follow `docs/report-and-presentation-outline.md`. Include problem, concepts, schema, methods, exact evaluation setup, actual tables/charts, screenshots, limitations, and future work. Explicitly label synthetic data and proxy labels, and report the relevance results as they are, including where the proposed method trails the baseline.
+
+- [ ] **Step 3: Build the Word-compatible artifact**
+
+Prefer a generated `.docx` only if a reliable local tool is available. Otherwise provide `docs/report.md` and documented conversion instructions. Never fabricate a Word file that omits the source or results.
+
+- [ ] **Step 4: Prepare the PPT**
+
+Use the 10–12-slide outline. Keep slide text short and use actual screenshots/charts only. If `.pptx` generation is unavailable, provide a complete slide-by-slide Markdown outline suitable for manual transfer.
+
+- [ ] **Step 5: Final verification and handoff**
+
+Re-run the Task 8 Step 3 commands. Update `PROJECT_PROGRESS.md` with final status, exact commands, test count/result, artifact paths, deferred items, and limitations. A fresh agent must be able to continue from this file without this conversation.
 
 ---
 
@@ -459,10 +490,10 @@ Update `PROJECT_PROGRESS.md` with final status, exact commands, test count/resul
 - **Day 6:** Task 5; classification comparison; deep learning decision.
 - **Day 7:** Task 6; metrics and first experiment outputs.
 - **Day 8:** Task 7; Streamlit demo.
-- **Day 9:** Task 8; report/PPT draft and screenshots.
-- **Day 10:** full verification, fixes, final report/PPT, and progress handoff.
+- **Day 9:** Task 8; end-to-end verification, demo script, rehearsal, and demo to the team and HOD.
+- **Day 10:** apply demo feedback; then Task 9 (report and PPT from the approved version) and final progress handoff.
 
-If time is lost, defer the optional neural baseline, extra categories, collaborative filtering, and polished document automation before deferring the data generator, proposed recommender, evaluation, or working demo.
+If time is lost, defer the optional neural baseline, extra categories, collaborative filtering, and polished document automation before deferring the data generator, proposed recommender, evaluation, or working demo. The report and PPT are written last, only after the working demo has been shown to the team and HOD and approved.
 
 ## Self-review against the design
 
@@ -471,7 +502,8 @@ If time is lost, defer the optional neural baseline, extra categories, collabora
 - Dataset preparation: Task 2 defines schemas, fixed seed, zero-history cases, and validation.
 - Evaluation: Task 6 includes classification and cold-start-specific recommendation metrics.
 - Final application: Task 7 provides the Streamlit demo and explanations.
-- Report/PPT: Task 8 uses actual experiment output and preserves limitations.
+- Demo readiness: Task 8 verifies the whole project end to end and gates on team/HOD review.
+- Report/PPT: Task 9 starts only after demo approval, uses actual experiment output, and preserves limitations.
 - Future changes: focused modules and explicit interfaces keep data, models, evaluation, and UI replaceable.
 - Review-focus edge cases: all five are attached to tests in Tasks 2, 3, 4, and 6.
 - Proportion: the plan specifies contracts and checks without prescribing implementation bodies beyond the decisions required by the design.
