@@ -115,6 +115,25 @@ def test_cold_start_recommendations_can_surface_suitable_zero_history_new_item()
     assert result.iloc[0]["reason"]
 
 
+def test_exposure_boost_requires_category_and_budget_suitability():
+    products, interactions, _ = _controlled_fixture()
+    products.loc[products["product_id"] == "phone", "is_new_item"] = True
+    products.loc[products["product_id"] == "phone", "is_new_brand"] = True
+    products.loc[products["product_id"] == "phone", "price"] = 2000.0
+    preferences = {
+        "preferred_category": "Television",
+        "budget_min": 500.0,
+        "budget_max": 800.0,
+        "preferred_features": "4K|HDR",
+    }
+
+    result = cold_start_recommendations(
+        products, interactions, preferences, top_k=3, exposure_weight=0.25
+    ).set_index("product_id")
+
+    assert result.loc["phone", "exposure_component"] == 0.0
+
+
 def test_recommend_for_new_user_uses_preferences_without_interactions():
     products, _, users = _controlled_fixture()
     empty_interactions = pd.DataFrame(

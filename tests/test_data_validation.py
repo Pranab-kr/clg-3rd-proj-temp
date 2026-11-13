@@ -58,3 +58,15 @@ def test_validation_reports_missing_columns_and_invalid_values():
 
     assert any("missing required columns" in error for error in errors)
     assert any("price" in error for error in errors)
+
+
+def test_interaction_validation_reports_missing_columns_without_raising():
+    errors = validate_interactions(pd.DataFrame())
+
+    assert any("missing required columns" in error for error in errors)
+
+
+def test_partial_interaction_validation_reports_schema_errors_without_raising():
+    errors = validate_interactions(pd.DataFrame({"user_id": ["u1"]}))
+
+    assert any("missing required columns" in error for error in errors)

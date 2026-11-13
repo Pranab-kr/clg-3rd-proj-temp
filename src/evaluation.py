@@ -69,21 +69,35 @@ def new_item_exposure(recommended_lists: list[list[str]], new_item_ids: set[str]
 
 
 def split_holdout(interactions: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Hold out each eligible user's latest positive interaction (row order = time)."""
+    """Hold out each user's latest positive on a product seen only once.
+
+    A product must occur exactly once for that user so the held-out item is not
+    still present in the training history. Users without such a positive are
+    skipped rather than evaluated with an impossible target.
+    """
     required = {"user_id", "product_id", "interaction_strength"}
     missing = sorted(required - set(interactions.columns))
     if missing:
         raise ValueError("interactions missing required columns: " + ", ".join(missing))
 
+    ordered = interactions.reset_index(drop=True)
     held_index = []
-    for _, group in interactions.groupby("user_id", sort=True):
+    for _, group in ordered.groupby("user_id", sort=True):
         if len(group) < 2:
             continue
-        positives = group.index[group["interaction_strength"] >= POSITIVE_STRENGTH]
-        if len(positives):
-            held_index.append(positives[-1])
-    held = interactions.loc[held_index].sort_values("user_id", kind="mergesort")
-    train = interactions.drop(index=held_index)
+        product_counts = group["product_id"].value_counts()
+        eligible_positive_indices = []
+        for index, row in group.iterrows():
+            product_id = row["product_id"]
+            if (
+                row["interaction_strength"] >= POSITIVE_STRENGTH
+                and product_counts[product_id] == 1
+            ):
+                eligible_positive_indices.append(index)
+        if eligible_positive_indices:
+            held_index.append(eligible_positive_indices[-1])
+    held = ordered.loc[held_index].sort_values("user_id", kind="mergesort")
+    train = ordered.drop(index=held_index)
     return train.reset_index(drop=True), held.reset_index(drop=True)
 
 

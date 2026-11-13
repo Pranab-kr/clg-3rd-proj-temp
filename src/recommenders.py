@@ -183,7 +183,13 @@ def cold_start_recommendations(
         + 0.15 * value
     )
     quality = 0.50 * rating + 0.25 * warranty + 0.25 * discount
-    exposure = exposure_weight * (is_new_item & zero_history).astype(float)
+    suitable_new_item = (
+        is_new_item
+        & zero_history
+        & category_match.eq(1.0)
+        & price_fit.eq(1.0)
+    )
+    exposure = exposure_weight * suitable_new_item.astype(float)
     scores = products.copy()
     scores["preference_match"] = preference_match
     scores["exposure_component"] = exposure

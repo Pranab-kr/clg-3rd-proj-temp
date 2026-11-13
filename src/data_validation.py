@@ -110,7 +110,7 @@ def validate_interactions(interactions: pd.DataFrame) -> list[str]:
     errors = _missing_columns(interactions, INTERACTION_REQUIRED_COLUMNS)
 
     for column in ("user_id", "product_id", "event_type"):
-        if interactions[column].isna().any():
+        if column in interactions and interactions[column].isna().any():
             errors.append(f"{column} must not contain null values")
     if error := _numeric_range_error(interactions, "interaction_strength", 0, None):
         errors.append(error)

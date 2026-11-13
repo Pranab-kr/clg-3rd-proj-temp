@@ -62,6 +62,11 @@ def test_split_holdout_is_deterministic_and_leaves_no_leakage():
     # at least one other interaction in training.
     assert held_a["user_id"].is_unique
     assert set(held_a["user_id"]) <= set(train_a["user_id"])
+    for _, held_row in held_a.iterrows():
+        assert train_a.loc[
+            (train_a["user_id"] == held_row["user_id"])
+            & (train_a["product_id"] == held_row["product_id"])
+        ].empty
 
 
 def test_evaluation_compares_both_methods_with_expected_columns():

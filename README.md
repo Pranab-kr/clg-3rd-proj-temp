@@ -4,9 +4,14 @@ This repository contains an educational, reproducible prototype for a third-year
 
 The initial dataset will be synthetic and clearly labelled. The project does not scrape Amazon, use private customer data, reproduce proprietary algorithms, or require external credentials or paid services.
 
-## Phase 1 status
+## Current status
 
-Phase 1 establishes the Python package, shared configuration, dependency manifest, and test layout. The later phases will add synthetic data generation, validation, feature preparation, recommenders, evaluation, and a Streamlit demonstration.
+Phases 1–8 are implemented. The project currently includes synthetic data
+generation and validation, product/user features, classification and clustering
+demonstrations, baseline and cold-start-aware recommenders, offline evaluation,
+experiment outputs, and a Streamlit demo. The team/HOD demo review is still a
+human approval step; report and presentation work remain intentionally deferred
+until that approval.
 
 ## Setup
 
@@ -26,7 +31,7 @@ The project uses a fixed random seed (`42`) and a default recommendation size of
 ## Verification and development commands
 
 ```bash
-# Focused Phase 1 test
+# Focused test
 python -m pytest tests/test_config.py -v
 
 # One test by name
@@ -35,13 +40,13 @@ python -m pytest tests/test_config.py::test_configuration_defines_reproducible_p
 # Full test suite
 python -m pytest -q
 
-# Generate the Phase 2 synthetic CSV snapshot
+# Generate the synthetic CSV snapshot
 .venv/Scripts/python.exe scripts/generate_data.py --seed 42
 
 # Run experiments (Phase 6): writes tables, charts, and metadata under results/
 .venv/Scripts/python.exe scripts/run_experiments.py --seed 42
 
-# Launch the Streamlit demo (Phase 7); walkthrough in docs/demo-script.md
+# Launch the Streamlit demo; walkthrough in docs/demo-script.md
 .venv/Scripts/python.exe -m streamlit run app.py
 ```
 
